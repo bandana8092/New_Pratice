@@ -31,7 +31,7 @@ class PostsTableViewCell: UITableViewCell {
            self.titleLabel.text = postModel[indexPath.row].title
            self.createdLabel.text = postModel[indexPath.row].createdDate.convertdateToFormate(formate: "dd MMM YYY")
            self.switchButton.isOn =  postModel[indexPath.row].switchStatus
-           self.contentView.backgroundColor = postModel[indexPath.row].switchStatus ? UIColor.lightGray : UIColor.white
+           self.contentView.backgroundColor = postModel[indexPath.row].switchStatus ? UIColor.lightText : UIColor.white
     }
            
 }

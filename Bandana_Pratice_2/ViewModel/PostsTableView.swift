@@ -28,31 +28,18 @@ class PostsTableview: UITableView,UITableViewDelegate,UITableViewDataSource {
         self.tableFooterView = UIView()
         
     }
-    
-    //Mark:- Switch Status
-    func updateSwitchStatus(postModel:[PostModel],indexPath:NSIndexPath,complitionHandler:@escaping(_ error:NSError?)-> Void){
-        postModel[indexPath.row].switchStatus = postModel[indexPath.row].switchStatus ? false : true
-        complitionHandler(nil)
-    }
-    
-    // load data when auto load  to append data to tableview
-    func autoLoadData(withPost:[PostModel]){
-        if(withPost.count == 0){
-            return
-        }
-        self.postModel = self.postModel+withPost
-        var loadIndexPaths = [IndexPath]()
-        for index in self.numberOfRows(inSection: 0) ... self.postModel.count-1{
-            let indexPath = IndexPath.init(row: index, section: 0)
-            loadIndexPaths.append(indexPath)
-        }
-        self.beginUpdates()
-        self.insertRows(at: loadIndexPaths, with: .automatic)
-        self.endUpdates()
-    }
+    func fetchMoreData(){
+         getPosts() { (error) in
+             if error == nil {
+                 DispatchQueue.main.async {
+                    self.reloadData()
+                }
+             }
+         }
+     }
+     
     // clear tableviewDate
     func clearAllData(){
-        
         self.pageCount = 1
         self.currentPage = 1
         self.totalPages = 1
@@ -109,19 +96,17 @@ class PostsTableview: UITableView,UITableViewDelegate,UITableViewDataSource {
     }
     //MARK:- UITableViewDelegate
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        updateSwitchStatus(postModel:postModel, indexPath:indexPath as NSIndexPath) { (error) in
-            if error == nil{
-                
-                let filteredArr = self.postModel.filter{$0.switchStatus == true}
-                if filteredArr.count > 0{
-                    self.presentedInViewController.navigationItem.title = "Number of selected posts: \(filteredArr.count)"
-                }else{
-                    self.presentedInViewController.navigationItem.title = " "
-                }
-                self.reloadData()
-            }
-        }
-    }
+         postModel[indexPath.row].switchStatus = postModel[indexPath.row].switchStatus ? false : true
+         let filteredArr = self.postModel.filter{$0.switchStatus == true}
+         if filteredArr.count > 0{
+            self.presentedInViewController.navigationItem.title = "Number of selected posts: \(filteredArr.count)"
+         }else{
+            self.presentedInViewController.navigationItem.title = " "
+         }
+            self.reloadData()
+         }
+      
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableView.automaticDimension
     }
@@ -132,7 +117,8 @@ class PostsTableview: UITableView,UITableViewDelegate,UITableViewDataSource {
             if #available(iOS 13.0, *) {
                 spinner = UIActivityIndicatorView(style:UIActivityIndicatorView.Style.medium)
             } else {
-                // Fallback on earlier versions
+                spinner = UIActivityIndicatorView(frame: CGRect(x: 10, y: 10, width: 20, height: 20))
+                
             }
             spinner.startAnimating()
             spinner.frame = CGRect(x: CGFloat(0), y: CGFloat(0), width: tableView.bounds.width, height: CGFloat(44))
@@ -140,19 +126,13 @@ class PostsTableview: UITableView,UITableViewDelegate,UITableViewDataSource {
             self.tableFooterView!.isHidden = false
             if totalPages > currentPage {
                 pageCount += 1
-                getPosts() { (error) in
-                    if error == nil {
-                        DispatchQueue.main.async {
-                            print(self.pageCount)
-                            self.reloadData()
-            } }
-                }
+                fetchMoreData()
             } else {
                 spinner.isHidden = true
                 spinner.stopAnimating()
             }
         }
     }
-    
+ 
     
 }

@@ -63,7 +63,7 @@ class PostsTableview: UITableView,UITableViewDelegate,UITableViewDataSource {
     func getPosts(complitionHandler:@escaping(_ error:NSError?)-> Void){
         ServiceHandler.shared.getDetailsFromServer(url: "\(BASE_URL)\(pageCount)") { (responseData, error) in
             if error == nil{
-                //print(responseData!)
+                print(responseData!)
                 
                 if responseData?.object(forKey: "nbPages") != nil{
                     let total = String(describing: responseData!.object(forKey: "nbPages")!)
